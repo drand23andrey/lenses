@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  api:
+    image: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./etc/.env
+    volumes:
+      - '.:/devel'
+    depends_on:
+      - mysql
+    networks:
+      - mysql
+      - traefik
+#    command: ["./wait-for-it.sh", "mysql:3306", "--", "python", "manage.py", "runserver", "172.19.0.5:5000"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.api.rule=Host(`${API_DOMAIN:-api.lenses.ru}`)"
+      - "traefik.http.routers.api.entryPoints=https"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.services.api.loadbalancer.server.port=5000"
+
+  mysql:
+    image: mariadb:10.5
+    environment:
+      - MYSQL_DATABASE=_lenses
+      - MYSQL_USER=_lenses
+      - MYSQL_PASSWORD=0123456789
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - "mysql:/var/lib/mysql"
+    networks:
+      - mysql
+
+volumes:
+  mysql:
+
+networks:
+  mysql:
+  traefik:
+    external: true
+    name: traefik
