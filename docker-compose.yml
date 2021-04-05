@@ -14,22 +14,17 @@ services:
       - mysql
     networks:
       - mysql
-      - traefik
-#    command: ["./wait-for-it.sh", "mysql:3306", "--", "python", "manage.py", "runserver", "172.19.0.5:5000"]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik"
-      - "traefik.http.routers.api.rule=Host(`${API_DOMAIN:-api.lenses.ru}`)"
-      - "traefik.http.routers.api.entryPoints=https"
-      - "traefik.http.routers.api.tls=true"
-      - "traefik.http.services.api.loadbalancer.server.port=5000"
+    command: ["./wait-for-it.sh", "mysql:3306", "--",
+              "python", "manage.py", "runserver", "${API_LOCALHOST:-0.0.0.0}:${API_LOCALPORT:-5000}"]
+    ports:
+      - ${API_LOCALPORT:-5000}:${API_LOCALPORT:-5000}
 
   mysql:
     image: mariadb:10.5
     environment:
-      - MYSQL_DATABASE=_lenses
-      - MYSQL_USER=_lenses
-      - MYSQL_PASSWORD=0123456789
+      - MYSQL_DATABASE=${DB_NAME:-_lenses}
+      - MYSQL_USER=${DB_USER:-_lenses}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-0123456789}
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
     volumes:
       - "mysql:/var/lib/mysql"
@@ -41,6 +36,3 @@ volumes:
 
 networks:
   mysql:
-  traefik:
-    external: true
-    name: traefik
