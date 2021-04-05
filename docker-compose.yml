@@ -14,8 +14,7 @@ services:
       - mysql
     networks:
       - mysql
-    command: ["./wait-for-it.sh", "mysql:3306", "--",
-              "python", "manage.py", "runserver", "${API_LOCALHOST:-0.0.0.0}:${API_LOCALPORT:-5000}"]
+    command: ["./wait-for-it.sh", "mysql:3306", "--", "python", "manage.py", "runserver", "${API_LOCALHOST:-0.0.0.0}:${API_LOCALPORT:-5000}"]
     ports:
       - ${API_LOCALPORT:-5000}:${API_LOCALPORT:-5000}
 
